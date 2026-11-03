@@ -22,7 +22,7 @@
 A car's speedometer tells you how fast you go but not how far you have come; its odometer tells you how far but not how fast. If you only had a record of one of them, could you rebuild the other? That question is the whole of calculus in disguise: going from distance to speed is differentiation, going from speed to distance is integration. In this session you do both with nothing but slopes and areas.
 
 ## B. Concept and theory
-Speed is distance divided by time. On a distance-time graph, 'distance divided by time' is rise over run, the slope. When the speed changes, the slope changes from moment to moment: the speed at a moment is the slope of the tangent line touching the curve there. Going the other way, distance equals speed times time. On a speed-time graph that is width times height, the area of a rectangle; if the speed changes we cut the time into slices and add up the areas (a trapezoid for a straight-line change). The unit of the area is s * m/s = m. Our car starts at rest and its speed is known at 0, 2, 4 and 6 s, with straight lines in between.
+Speed is distance divided by time. On a distance-time graph, 'distance divided by time' is rise over run, the slope. When the speed changes, the slope changes from moment to moment: the speed at a moment is the slope of the tangent line touching the curve there. Going the other way, for a steady speed, distance equals speed times time. On a speed-time graph that is width times height, the area of a rectangle; if the speed changes we cut the time into slices and add up the areas (a trapezoid for a straight-line change). The unit of the area is s * m/s = m. Our car starts at rest and its speed is known at 0, 2, 4 and 6 s, with straight lines in between.
 
 | Symbol | Meaning | Unit |
 |---|---|---|
@@ -34,7 +34,7 @@ Speed is distance divided by time. On a distance-time graph, 'distance divided b
 
 **Assumptions**
 
-- The car moves along a straight road and never reverses, so speed and distance only grow in the direction of travel.
+- The car moves along a straight road and never reverses, so the speed is never negative and the distance only grows.
 - Between the four known moments the speed changes in a straight line.
 - The car starts at rest at x = 0 and t = 0.
 
@@ -45,7 +45,7 @@ $$ \Delta x=\frac{v_1+v_2}{2}\,\Delta t\quad\text{(area of one trapezoid under t
 $$ x(t)=\text{area under }v\text{ from }0\text{ to }t,\qquad v(t)=\text{slope of }x\text{ at }t $$
 
 ## C. Visual explanation
-The left figure shows speed against time for a car with speeds 10, 14 and 6 m/s at 2, 4 and 6 s; the shaded area up to 4 s is 34 m. The right figure shows distance against time for the same car: the curve rises steeply where the speed is high and the dashed tangent at 4 s has a slope of 14 m/s, the speed read from the other graph. A flat piece of the speed graph is a straight, steady piece of the distance graph; a rising piece of the speed graph is a distance curve that bends upwards.
+The left figure shows speed against time for a car with speeds 10, 14 and 6 m/s at 2, 4 and 6 s; the shaded area up to 4 s is 34 m. The right figure shows distance against time for the same car: the curve rises steeply where the speed is high and the dashed tangent at 4 s has a slope of 14 m/s, the speed read from the other graph. A flat piece of the speed graph (steady speed) is a straight, sloping piece of the distance graph; a rising piece of the speed graph is a distance curve that bends upwards.
 
 ![Distance against time: the tangent at 4 s has slope 14 m/s, the speed.](../../docs/figures/s01_distance_slope.png)
 
@@ -89,6 +89,7 @@ Read the height of the speed graph, not its steepness, and remember slope = spee
 No. A flat speed graph at 10 m/s means a constant speed of 10 m/s: the car is moving steadily, its distance graph is a straight sloped line (slope 10 m/s). A flat distance graph means the distance is not changing, so the speed is zero and the car is stopped. 'Flat' means different things on the two graphs: the speed graph shows the speed itself, the distance graph shows it only through its slope.
 
 </details>
+
 **Question type B: Numerical.** A car has speeds 0, 12, 12 and 6 m/s at t = 0, 2, 4 and 6 s, with straight lines between. Find the total distance in 6 s and the average speed. Check the units.
 
 <details>
@@ -104,6 +105,7 @@ Add three trapezoids; average speed is total distance divided by total time.
 Slice 1: (0 + 12)/2 * 2 = 12 m. Slice 2: (12 + 12)/2 * 2 = 24 m. Slice 3: (12 + 6)/2 * 2 = 18 m. Total = 54 m. Average speed = 54 m / 6 s = 9 m/s. Sanity check: the speed is always between 0 and 12 m/s, so 9 m/s is a believable average. Units: m/s * s = m.
 
 </details>
+
 **Question type C: Graph and simulation interpretation.** In the distance graph of the car from the worked example (speeds 10, 14, 6 m/s), where is the curve steepest and what is its slope there? What is the slope at the end, t = 6 s?
 
 <details>
@@ -119,6 +121,7 @@ The slope of the distance graph at a time equals the speed at that time.
 The curve is steepest at t = 4 s where the speed peaks at 14 m/s, so the slope is 14 m/s. At t = 6 s the speed is 6 m/s, so the slope has dropped to 6 m/s: the curve is still rising but much more gently. The distance never goes down because the speed is never negative.
 
 </details>
+
 **Question type D: Design and optimisation challenge.** Design: choose the speeds at 2, 4 and 6 s (each at most 20 m/s, the limit of this exercise) so that the car covers at least 90 m in 6 s. Find a choice that works and one that fails, and say what you would trade off.
 
 <details>
