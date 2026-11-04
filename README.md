@@ -9,11 +9,11 @@ opencalculus teaches derivatives and integrals as slopes and areas, from a car's
 - **Start from a car.** Session 1 needs only a speed graph and school arithmetic; slope and area are explained from scratch.
 - **See it move.** Every session ships a slider app that runs in the browser, with labelled graphs and units.
 - **Know you got it right.** Each session ends with a checkpoint that prints PASS or FAIL against hand calculations and exact answers.
-- **Build the missing half.** The repo stops at Session 4 on purpose; the roadmap shows the path to the Target.
+- **Build the missing half.** The repo stops at Session 5 on purpose; the roadmap shows the path to the Target.
 
 [Target](#the-target) · [Who is this for](#who-is-this-for) · [Quick start](#quick-start) · [Sessions](#sessions) · [Roadmap](#roadmap) · [Contribute](#contribute) · [Explainer PDF](docs/explainer.pdf)
 
-> **This repo is incomplete on purpose.** Sessions 1 to 4 are here and fully working. The finished Target below is a preview of what the community can build next. We show you the path, not the code. Sessions 5 and up are yours.
+> **This repo is incomplete on purpose.** Sessions 1 to 5 are here and fully working. The finished Target below is a preview of what the community can build next. We show you the path, not the code. Sessions 6 and up are yours.
 
 ## The Target
 
@@ -77,6 +77,7 @@ Every session also opens in your browser with sliders (no install): [live apps](
 | 2 | [Derivative and integral as limits](sessions/session-02/README.md) | Level 2: mathematical engineering model | 75 min | [open](https://krunalpanchal1995.github.io/opencalculus/session-02/) |
 | 3 | [Numerical slopes and areas, and their errors](sessions/session-03/README.md) | Level 3: simulation and validation | 90 min | [open](https://krunalpanchal1995.github.io/opencalculus/session-03/) |
 | 4 | [Romberg integration: far more accuracy from the same function values](sessions/session-04/README.md) | Level 3: simulation and validation | 90 min | [open](https://krunalpanchal1995.github.io/opencalculus/session-04/) |
+| 5 | [Gaussian quadrature: choosing where to sample](sessions/session-05/README.md) | Level 3: simulation and validation | 90 min | [open](https://krunalpanchal1995.github.io/opencalculus/session-05/) |
 
 Each session follows the same six steps: A real-world problem, B concept and theory, C visual explanation, D interactive simulation, E worked example and experiment, F assessment and design challenge. Each ends with `checkpoint.py`, which prints `PASS` or `FAIL` against reference numbers. Session 3 also contains the real-world mini-project: **Reconstruct the distance travelled from a noisy speedometer log**.
 
@@ -88,14 +89,15 @@ flowchart LR
   S2[Session 2<br/>Derivative and integral as limits]
   S3[Session 3<br/>Numerical slopes and areas, and their errors]
   S4[Session 4<br/>Romberg integration: far more accuracy from the same function values]
-  R[Roadmap S5+<br/>YOU build this]
+  S5[Session 5<br/>Gaussian quadrature: choosing where to sample]
+  R[Roadmap S6+<br/>YOU build this]
   T((Target))
-  S1 --> S2 --> S3 --> S4 --> R --> T
+  S1 --> S2 --> S3 --> S4 --> S5 --> R --> T
 ```
 
 | Folder or file | What is inside |
 |---|---|
-| `sessions/` | four sessions: README (A-F), `lesson.py`, notebook, live app, exercises, activity sheet, checkpoint |
+| `sessions/` | five sessions: README (A-F), `lesson.py`, notebook, live app, exercises, activity sheet, checkpoint |
 | `promo/` | the Target: media, live links, and the roadmap (path only) |
 | `docs/` | `explainer.tex` and the built `explainer.pdf` |
 | `tests/` | runs every lesson and checkpoint headless |
@@ -107,7 +109,6 @@ flowchart LR
 
 | Milestone | What you will build | Difficulty |
 |---|---|---|
-| Session 5: Gaussian quadrature | A Gauss-Legendre integrator with a handful of nodes. | intermediate |
 | Session 6: Derivatives without subtraction | A derivative routine that avoids the round-off limit of Session 3. | advanced |
 | Session 7: Derivatives of noisy data | A smoothing differentiator for the speedometer log of the mini-project. | advanced |
 | Session 8: Solve the braking ODE | A solver for a braking car with drag, v' = -c v^2, and the distance it travels. | advanced |

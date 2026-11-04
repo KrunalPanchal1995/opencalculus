@@ -18,12 +18,13 @@ Calculus is the mathematics of change and accumulation. This explainer follows a
 \section*{The end goal}
 See derivatives and integrals as slopes and areas on a moving car's graph. The end goal is to see derivatives and integrals as slopes and areas on a moving car's graph. The same ideas drive physics (velocity, work, charge), engineering (signals, control) and data science (rates and totals from measurements).
 
-\section*{How the four sessions build up}
+\section*{How the five sessions build up}
 \begin{enumerate}[nosep]
 \item \textbf{Session 1: Slope is speed, area is distance} (Level 1, conceptual interactive model, 60 min).
 \item \textbf{Session 2: Derivative and integral as limits} (Level 2, mathematical engineering model, 75 min).
 \item \textbf{Session 3: Numerical slopes and areas, and their errors} (Level 3, simulation and validation, 90 min).
 \item \textbf{Session 4: Romberg integration: far more accuracy from the same function values} (Level 3, simulation and validation, 90 min).
+\item \textbf{Session 5: Gaussian quadrature: choosing where to sample} (Level 3, simulation and validation, 90 min).
 \end{enumerate}
 
 \section{Session 1: Slope is speed, area is distance}
@@ -245,14 +246,74 @@ Build a three-row Romberg table for the area of e\textasciicircum{}x on [0, 1] a
 \item \textbf{Design and optimisation challenge.} Your budget is 40 function values (40 minutes) for the area of exp(-x\textasciicircum{}2) on [0, 2]. On the grids of 2\textasciicircum{}k + 1 values, which rule should you use and what error will it reach? What must you budget if you need 1e-12?
 \end{enumerate}
 
+\section{Session 5: Gaussian quadrature: choosing where to sample}
+
+\subsection*{A. Real-world problem}
+In Session 4 Romberg integration needed 65 function values to reach 1e-12 for a bell curve, and Simpson's rule needed 513. If every value is a one-minute simulation, that is a long wait. All those rules used equally spaced points and chose only the weights. What if we also choose where to sample? With 5 well-placed values the area of e\textasciicircum{}x on [0, 1] can be found with an error of 6.5e-13, while Simpson's rule with 5 values has an error of 3.7e-5. (Educational model with exact answers: not for design work.)
+
+\subsection*{B. Concept and theory}
+A quadrature rule approximates an integral by a weighted sum of function values: the area is about w\_1 f(x\_1) + ... + w\_n f(x\_n). With equally spaced points only the n weights are free, and the best you can do is be exact for polynomials of degree about n - 1. If the n points are free too there are 2n numbers to choose, and a polynomial of degree 2n - 1 has 2n coefficients. Gauss showed that the choice that makes the rule exact for all of them puts the points at the roots of the Legendre polynomial P\_n. These polynomials follow the recurrence (k + 1) P\_(k+1)(x) = (2k + 1) x P\_k(x) - k P\_(k-1)(x), starting from P\_0 = 1 and P\_1 = x. The roots lie inside the interval, crowd towards its ends and are symmetric; the weights are all positive and add up to the interval length (2 on [-1, 1]).
+
+On [a, b] the points are mapped as x = m + r t, with the midpoint m = (a + b) / 2 and half-length r = (b - a) / 2, and the integral is r times the weighted sum. The 2-point rule has t = plus or minus 1/sqrt(3) with weights 1 and 1; the 3-point rule has t = 0 and plus or minus sqrt(3/5) with weights 8/9 and 5/9. For a function that is smooth enough (analytic) the error falls faster than any power of 1/n: every extra point adds several digits, which is why 5 points can beat 513.
+
+There is a price. The rules are not nested: the (n + 1)-point rule shares almost no points with the n-point rule, so if you do not know in advance which n is enough and try n = 2, 3, 4, ... until two rules agree, every rule you try costs n new values. And, like all high-order rules, the method relies on smoothness: for sqrt(x) the error only falls like n\textasciicircum{}-3, for a periodic function the plain trapezoid rule is much better, and a narrow peak is simply missed. Everything here has an exact answer to compare with; it is a teaching model, not a validated library.
+
+\begin{itemize}[nosep]
+\item n: number of points (and function values) (no unit)
+\item t\_i, w\_i: node and weight on [-1, 1] (roots of P\_n) (no unit)
+\item m, r: midpoint and half-length of [a, b] (same unit as x)
+\item P\_n: Legendre polynomial of degree n (no unit)
+\item degree: highest power of x the rule integrates exactly, 2n - 1 (no unit)
+\item values: number of function evaluations (no unit)
+\end{itemize}
+
+\begin{equation*}
+\int_a^b f\,dx\approx r\sum_{i=1}^{n}w_i\,f(m+r\,t_i),\qquad m=\tfrac{a+b}2,\ r=\tfrac{b-a}2
+\end{equation*}
+
+\begin{equation*}
+(k+1)P_{k+1}(x)=(2k+1)\,x\,P_k(x)-k\,P_{k-1}(x),\qquad P_n(t_i)=0,\qquad w_i=\frac{2}{(1-t_i^2)\,P_n'(t_i)^2}
+\end{equation*}
+
+\begin{equation*}
+\int_{-1}^{1}x^k\,dx=\sum_i w_i t_i^k\ \ \text{for all }k\le 2n-1
+\end{equation*}
+
+\begin{center}\includegraphics[width=0.95\linewidth]{figures/s05_nodes_weights.png}\\\small Five equally spaced values against the five Gauss-Legendre values for e to the x on [0, 1]; the rectangles show the weights.\end{center}
+
+\begin{center}\includegraphics[width=0.95\linewidth]{figures/s05_error_vs_values.png}\\\small Error against the number of function values for Simpson, Romberg and Gauss, on e to the x and on the bell curve.\end{center}
+
+\begin{center}\includegraphics[width=1.0\linewidth]{figures/s05_exactness_and_failures.png}\\\small Left: the error jumps after degree 2n minus 1. Middle: the square root converges slowly. Right: for a periodic function the trapezoid rule wins.\end{center}
+
+\subsection*{E. Worked example}
+Find the area of e\textasciicircum{}x on [0, 1] with the 2-point and the 3-point Gauss-Legendre rules and compare with Simpson's rule for the same number of function values.
+\begin{enumerate}[nosep]
+\item Exact: e - 1 = 1.718282. On [0, 1] the midpoint is m = 0.5 and the half-length r = 0.5.
+\item Two points: t = plus or minus 0.577350, so x = 0.5 plus or minus 0.288675 = 0.211325 and 0.788675, with weights 1 and 1. The values are e\textasciicircum{}0.211325 = 1.235314 and e\textasciicircum{}0.788675 = 2.200479.
+\item Two-point area: 0.5 x (1 x 1.235314 + 1 x 2.200479) = 1.717896, error -3.9e-4.
+\item Three points: t = -0.774597, 0 and 0.774597, so x = 0.112702, 0.5 and 0.887298, with weights 5/9, 8/9 and 5/9. The values are 1.119298, 1.648721 and 2.428560.
+\item Three-point area: 0.5 x (5/9 x 1.119298 + 8/9 x 1.648721 + 5/9 x 2.428560) = 1.718281, error -8.2e-7.
+\item Simpson's rule with the same 3 values (x = 0, 0.5, 1) gives 1.718861 with error +5.8e-4, so the 3-point Gauss rule is about 700 times closer.
+\end{enumerate}
+\textbf{Answer.} 2 points: 1.717896 (error -3.9e-4); 3 points: 1.718281 (error -8.2e-7), against Simpson's 1.718861 (error 5.8e-4) for the same 3 values.
+
+\subsection*{F. Questions}
+\begin{enumerate}[nosep]
+\item \textbf{Conceptual.} Why is the n-point Gauss-Legendre rule exact up to degree 2n - 1, when the n-point rule with equally spaced points is exact only up to about degree n - 1?
+\item \textbf{Numerical.} Use the 2-point Gauss-Legendre rule to find the area of x\textasciicircum{}3 + 1 on [1, 3], and then the area of x\textasciicircum{}4 on [1, 3]. The exact answers are 22 and 48.4.
+\item \textbf{Graph and simulation interpretation.} In the error-against-values figure for the bell curve, at 9 values the errors are 1.6e-5 (Simpson), 5.0e-5 (Romberg) and 1.2e-11 (Gauss). What do you conclude about Gauss, and about the claim that Romberg is always better than Simpson?
+\item \textbf{Design and optimisation challenge.} You can afford 10 function values (10 minutes) for the area of exp(-x\textasciicircum{}2) on [0, 2]. Which rule do you choose and what error do you expect? Then suppose you needed 1e-12 and did not know how many points to use: what would the Gauss approach cost, and how does it compare with Romberg?
+\end{enumerate}
+
 \section{Real-world mini-project}
 \textbf{Reconstruct the distance travelled from a noisy speedometer log.} A car's speedometer was logged 10 times per second for 60 s with \texttt{t, v = speedometer\_log()} from Session 3 (fixed seed 4, the default; the figures below are for that seed and are asserted by the Session 3 checkpoint). The log has random noise of 0.8 m/s and the speedometer reads 2 percent too high. The only outside fact is that a pair of roadside markers shows the car covered 822 m in the 60 s. Use \texttt{integrate\_log} to reconstruct the distance, remove the calibration error with the marker fact, and then estimate the car's acceleration by smoothing the speed before differentiating (a moving average of 21 samples is a good start).
 
 \textbf{How many function values does each rule need?} A heat-flow simulation returns the flux q(x) = exp(-x\textasciicircum{}2) (made-up units) at a point x on a plate 2 units wide, and every call costs one minute. The total heat is the integral of q from 0 to 2, whose exact value sqrt(pi)/2 erf(2) = 0.882081 is known here so that you can check. Use \texttt{evaluations\_needed} and \texttt{romberg\_table} from Session 4 to find, for the targets 1e-6, 1e-8, 1e-10 and 1e-12, how many function values (minutes) the trapezoid rule, Simpson's rule and Romberg integration need on the grids with 2\textasciicircum{}k + 1 values. \textbf{Deliverable:} A script that prints a table of values needed for each rule and target, the number of minutes saved by Romberg against Simpson at 1e-10, and a log-log plot of error against the number of values for the three rules; then two sentences on what happens to Romberg for sqrt(x) on [0, 1] with 129 values (use \texttt{FUNCTIONS[3]}) and why. \textbf{Success looks like:} For 1e-6, 1e-8, 1e-10 and 1e-12 Simpson needs 17, 65, 257 and 513 values and Romberg 17, 33, 33 and 65; the trapezoid rule needs 257, 2049 and 16385 and more than 131 073 for the last. At 1e-10 Romberg saves 224 minutes against Simpson. For sqrt(x) with 129 values the Romberg error is 4.7e-5, only 3 times better than the trapezoid rule's 1.4e-4, because the error series has no even powers of h to cancel.
 
+\textbf{Which rule for an expensive simulation?} The plate of Session 4 again: a simulation returns the flux q(x) = exp(-x\textasciicircum{}2) (made-up units) at a point on a plate 2 units wide, one minute per call, and the total is the integral from 0 to 2 (exact 0.882081). Use \texttt{gauss\_values\_needed}, \texttt{gauss\_tol} and \texttt{gauss\_legendre} from Session 5 and the Session 4 counts of Simpson and Romberg (17, 65, 257, 513 and 17, 33, 33, 65 values for 1e-6, 1e-8, 1e-10 and 1e-12). Find, for those targets, the number of values Gauss needs when n is known and the total number it spends when n must be found by trying, then check what happens for the two functions that Gauss does not like. \textbf{Deliverable:} A script that prints the table of values for the three rules at the four targets (and the total spent by the stopping rule), a log-scale plot of error against values, and a recommendation in three sentences: which rule you would use for this plate, and for a square root \texttt{FUNCTIONS[3]} and for a periodic function \texttt{FUNCTIONS[4]} over one period. \textbf{Success looks like:} Gauss needs 6, 7, 9 and 10 values when n is known, but the stopping rule spends 27, 35, 54 and 65 (for 1e-12 the same 65 as Romberg, because the rules are not nested). For sqrt(x) 80 Gauss values give an error of 2.0e-7 (Romberg with 129 values: 4.7e-5), but 160 values still give only 2.5e-8, an order of 3 on a log-log plot. For the periodic function the plain trapezoid rule with 17 values is at round-off (2e-16) while Gauss with 17 values has an error of 1.4e-10.
+
 \section{The path ahead}
 \begin{enumerate}[nosep]
-\item \textbf{Session 5: Gaussian quadrature.} A Gauss-Legendre integrator with a handful of nodes.
 \item \textbf{Session 6: Derivatives without subtraction.} A derivative routine that avoids the round-off limit of Session 3.
 \item \textbf{Session 7: Derivatives of noisy data.} A smoothing differentiator for the speedometer log of the mini-project.
 \item \textbf{Session 8: Solve the braking ODE.} A solver for a braking car with drag, v' = -c v\textasciicircum{}2, and the distance it travels.
@@ -290,6 +351,14 @@ Build a three-row Romberg table for the area of e\textasciicircum{}x on [0, 1] a
 \item \textbf{Numerical.} Hint: R(i,1) = (4 T\_i - T\_(i-1)) / 3 and R(2,2) = (16 R(2,1) - R(1,1)) / 15. Solution: R(1,1) = (4 x 3.1 - 3.0) / 3 = 3.133333. R(2,1) = (4 x 3.131176 - 3.1) / 3 = 3.141569. R(2,2) = (16 x 3.141569 - 3.133333) / 15 = 3.142118. The errors are -8.3e-3, -2.4e-5 and +5.3e-4: the closest entry is R(2,1), not the corner. With only 5 values the h\textasciicircum{}6 term is not yet small compared with the h\textasciicircum{}4 term, so the last extrapolation overshoots. With 6 rows (33 values) the corner has caught up and is at 4.8e-11, but it is no better than the best entry of its row (3.7e-11).
 \item \textbf{Graph and simulation interpretation.} Hint: Divide the errors. Look for the floor in the figure near 1e-16. Solution: Romberg is 5.6e-4 / 3.3e-14 = 1.7e10 times better than the trapezoid rule and 1.5e-7 / 3.3e-14 = 4.4e6 times better than Simpson. Beyond 33 values (error about 2e-16 in the lesson) the line stops falling and wobbles around 1e-16: the answer is at the round-off limit of double precision, so more values cannot help and cost more.
 \item \textbf{Design and optimisation challenge.} Hint: The grids have 3, 5, 9, 17, 33, 65 values. Use the largest that fits, and the table in section C. Solution: The largest grid within 40 values has 33 values. There the errors are 2.4e-5 for the trapezoid rule, 6.2e-8 for Simpson and 5.3e-11 for Romberg (corner), so Romberg is the best choice, over 1000 times better than Simpson. For 1e-12 Romberg needs 65 values (error 1.2e-13) against 513 for Simpson, so budget 65 minutes. Note that for this function the corner is not always the best entry of its row: at 33 values the entry in column 2 has error 2.2e-11, slightly better than the corner, but you cannot know which entry is best without the exact answer, so the corner is the usual choice.
+\end{enumerate}
+
+\subsection*{Session 5}
+\begin{enumerate}[nosep]
+\item \textbf{Conceptual.} Hint: Count the free numbers in a rule (points and weights) and the coefficients of a polynomial. Solution: A rule with n fixed equally spaced points can only choose its n weights, so it can be made exact for the n monomials 1, x, ..., x\textasciicircum{}(n-1): degree n - 1 (one more for symmetric rules such as Simpson's). If the n points are free as well there are 2n numbers to choose, and a polynomial of degree 2n - 1 has exactly 2n coefficients, so all of them can be integrated exactly. The Legendre roots are the choice that achieves this. Check: the 3-point rule is exact for x\textasciicircum{}5 but not for x\textasciicircum{}6, where its error on [0, 1] is 3.6e-4.
+\item \textbf{Numerical.} Hint: The midpoint is m = 2 and the half-length r = 1, so x = 2 plus or minus 0.57735 and the weights are 1 and 1. Solution: The points are x = 2 - 0.577350 = 1.422650 and 2 + 0.577350 = 2.577350. For x\textasciicircum{}3 + 1 the values are 3.879348 and 18.120648; the area is 1 x (3.879348 + 18.120648) = 22.000 (exact: a cubic is within degree 2n - 1 = 3). For x\textasciicircum{}4 the values are 4.0963 and 44.1259, the area is 48.2222, an error of -0.178: degree 4 is beyond 2n - 1, so the rule is no longer exact.
+\item \textbf{Graph and simulation interpretation.} Hint: Divide the errors, and compare Romberg with Simpson at the same number of values. Solution: Gauss is 1.6e-5 / 1.2e-11 = 1.4e6 times better than Simpson with the same 9 values. At 9 values Romberg (corner) is about 3 times worse than Simpson: the bell curve bends so much that the higher columns of the table, which assume the h\textasciicircum{}2, h\textasciicircum{}4, h\textasciicircum{}6 error series has already settled, make things worse until the grid is fine enough. At 17 values Romberg wins (1.8e-7 against 9.9e-7). So Romberg is not always better than Simpson, and the corner of a table is a good choice only once the grid is fine.
+\item \textbf{Design and optimisation challenge.} Hint: Use the table in section C: for the second part count all the values spent by trying n = 2, 3, 4, ... Solution: With 10 values: Gauss with n = 10 has an error of 3.1e-13, Simpson with 9 values has 1.6e-5 and Romberg with 9 values 5.0e-5: choose Gauss. If you do not know n in advance you raise n until two rules agree to within 1e-12; that happens at n = 11 after 2 + 3 + ... + 11 = 65 values in total, exactly what Romberg needs (65), because the Gauss rules are not nested and nothing is reused. Gauss wins clearly when you can fix n in advance (for example from a trial run on a similar problem), and its advantage largely disappears when you must discover n during the run.
 \end{enumerate}
 
 \section{How to join}

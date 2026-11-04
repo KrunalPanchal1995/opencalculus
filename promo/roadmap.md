@@ -2,16 +2,6 @@
 
 This is the path, not the code. Each milestone says what you learn, what you build, and how you know it works. Pick one and open a pull request. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Session 5: Gaussian quadrature
-
-**You will learn:** Why well-chosen sample points beat equally spaced ones.
-
-**You will build:** A Gauss-Legendre integrator with a handful of nodes.
-
-**Checkpoint (not met by the shipped code):** The same area of e^x on [0, 1] to an error below 1e-11 using only 5 function evaluations (the shipped Simpson rule with 5 evaluations gives 3.7e-5).
-
-**Difficulty:** intermediate
-
 ## Session 6: Derivatives without subtraction
 
 **You will learn:** How complex numbers give a derivative with no cancellation error.
