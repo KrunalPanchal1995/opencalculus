@@ -22,6 +22,17 @@ def run_checks(L):
     stop = L.knot_speeds(10.0, 0.0, 0.0)
     checks.append(("a stopped car adds no distance", abs(float(L.distance(6.0, stop)) - float(L.distance(4.0, stop))) < 1e-9))
     checks.append(("distance never decreases for non-negative speeds", bool(np.all(np.diff(L.distance(np.linspace(0, 6, 61), v)) >= 0))))
+    # second example: a car that starts already moving (issue: second example car)
+    mv = L.knot_speeds(10.0, 14.0, 6.0, v0=8.0)
+    dm = L.distance_at_knots(mv)
+    checks.append((f"moving start: v0 = 8 m/s gives distances 0, 18, 42, 62 m at the knots (got {np.round(dm, 3).tolist()})",
+                   np.allclose(dm, [0, 18, 42, 62])))
+    checks.append(("moving start: speed at t = 0 is v0 and the default v0 is still 0",
+                   float(L.speed(0.0, mv)) == 8.0 and float(L.knot_speeds(1, 2, 3)[0]) == 0.0))
+    checks.append(("moving start: distance(1 s) = 8 * 1 + 0.5 * 1 * 1 = 8.5 m, and the tangent slope there is 9 m/s",
+                   abs(float(L.distance(1.0, mv)) - 8.5) < 1e-12 and abs(L.slope_of_distance(1.0, mv) - 9.0) < 1e-6))
+    checks.append(("moving start: a steady 12 m/s from the start gives exactly 12 * 6 = 72 m",
+                   abs(float(L.distance_at_knots(L.knot_speeds(12.0, 12.0, 12.0, v0=12.0))[-1]) - 72.0) < 1e-12))
     return checks
 
 

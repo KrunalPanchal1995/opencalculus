@@ -56,7 +56,7 @@ The left figure shows speed against time for a car with speeds 10, 14 and 6 m/s 
 *Speed against time: the shaded area up to 4 s is the distance, 34 m.*
 
 ## D. Interactive simulation
-Run the lesson (`python start.py 1`), then open the live app: [Session 1: slope is speed, area is distance](https://krunalpanchal1995.github.io/opencalculus/session-01/) (or `app.html` in this folder). Drag the three speed sliders to reshape the speed curve and watch the car on the road, then open the distance view and move the time slider: the red tangent line always has slope equal to the speed. Compare the shaded area in the speed view with the distance in the readout.
+Run the lesson (`python start.py 1`), then open the live app: [Session 1: slope is speed, area is distance](https://krunalpanchal1995.github.io/opencalculus/session-01/) (or `app.html` in this folder). Drag the three speed sliders to reshape the speed curve and watch the car on the road, then open the distance view and move the time slider: the red tangent line always has slope equal to the speed. Use the **starting speed** slider (or the preset **Starts at 8 m/s**) for a car that is already moving at t = 0: with 8, 10, 14 and 6 m/s at 0, 2, 4 and 6 s the first slice has area 2 x (8 + 10) / 2 = 18 m instead of 10 m, so the distances at 2, 4 and 6 s become 18, 42 and 62 m. Compare the shaded area in the speed view with the distance in the readout.
 
 **Challenge.** Make the car cover at least 90 m in the 6 s without ever going faster than 20 m/s.
 

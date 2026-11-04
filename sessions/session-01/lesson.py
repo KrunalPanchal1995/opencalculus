@@ -18,14 +18,14 @@ import numpy as np
 # where figures are saved (works as a script and in Jupyter/Colab)
 OUT = (pathlib.Path(__file__).resolve().parent if "__file__" in globals() else pathlib.Path(".")) / "out"
 
-# The car starts at rest. Its speed (m/s) is known at t = 0, 2, 4, 6 seconds and is a straight
-# line between those moments.
+# The car starts at rest (or, in the second example, already moving at a starting speed v0).
+# Its speed (m/s) is known at t = 0, 2, 4, 6 seconds and is a straight line between those moments.
 KNOT_T = np.array([0.0, 2.0, 4.0, 6.0])
 
 
-def knot_speeds(a, b, c):
-    """Speeds at the four moments: 0 at the start, then a, b, c (m/s)."""
-    return np.array([0.0, a, b, c], dtype=float)
+def knot_speeds(a, b, c, v0=0.0):
+    """Speeds at the four moments: v0 at the start (0 = starts at rest), then a, b, c (m/s)."""
+    return np.array([v0, a, b, c], dtype=float)
 
 
 # %% [markdown]
@@ -43,6 +43,8 @@ def speed(t, v_knots):
 # Each slice between two knots is a trapezoid: width (seconds) times the average of its two
 # parallel sides (m/s). Width * height has the unit s * m/s = m, a distance.
 # For a car at a steady 10 m/s for 2 s: area = 2 * 10 = 20 m.
+# A car that starts already moving has more area from the first slice: v0 = 8 m/s rising to
+# 10 m/s in the first 2 s covers 2 * (8 + 10) / 2 = 18 m, where a car from rest covers 10 m.
 
 # %%
 def distance_at_knots(v_knots):
