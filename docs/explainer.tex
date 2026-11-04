@@ -18,11 +18,12 @@ Calculus is the mathematics of change and accumulation. This explainer follows a
 \section*{The end goal}
 See derivatives and integrals as slopes and areas on a moving car's graph. The end goal is to see derivatives and integrals as slopes and areas on a moving car's graph. The same ideas drive physics (velocity, work, charge), engineering (signals, control) and data science (rates and totals from measurements).
 
-\section*{How the three sessions build up}
+\section*{How the four sessions build up}
 \begin{enumerate}[nosep]
 \item \textbf{Session 1: Slope is speed, area is distance} (Level 1, conceptual interactive model, 60 min).
 \item \textbf{Session 2: Derivative and integral as limits} (Level 2, mathematical engineering model, 75 min).
 \item \textbf{Session 3: Numerical slopes and areas, and their errors} (Level 3, simulation and validation, 90 min).
+\item \textbf{Session 4: Romberg integration: far more accuracy from the same function values} (Level 3, simulation and validation, 90 min).
 \end{enumerate}
 
 \section{Session 1: Slope is speed, area is distance}
@@ -186,12 +187,71 @@ Find the forward and central difference of sin x at x = 1 with h = 0.1 and compa
 \item \textbf{Design and optimisation challenge.} Design: you must integrate a function with one very narrow spike (width 0.005) on [0, 1] to 1e-8. Compare a uniform Simpson rule with an adaptive one, and say what could go wrong with the adaptive rule.
 \end{enumerate}
 
+\section{Session 4: Romberg integration: far more accuracy from the same function values}
+
+\subsection*{A. Real-world problem}
+Some numbers are expensive. If each function value is a one-minute simulation, or one reading from a slow instrument, you want the most accuracy from the fewest values. In Session 3, Simpson's rule with 17 values gave an error of about 1.5e-7 for the area under e\textasciicircum{}x on [0, 1]. Can the same 17 values give an error below 1e-12? And how much does that save when the function is a bell curve whose area needs to be known to ten digits? (Educational model with exact answers: not for design work.)
+
+\subsection*{B. Concept and theory}
+The trapezoid rule with 2\textasciicircum{}i slices is T\_i. Going from T\_(i-1) to T\_i needs only the new midpoints, so a table of \texttt{levels} rows costs 2\textasciicircum{}(levels-1) + 1 function values in total, the cost of one trapezoid rule on the finest grid.
+
+For a smooth function the trapezoid error is a series in even powers of the step: T(h) = I + c1 h\textasciicircum{}2 + c2 h\textasciicircum{}4 + c3 h\textasciicircum{}6 + ..., where the constants c1, c2, ... do not depend on h. Halving h divides the h\textasciicircum{}2 term by 4, so the combination (4 T(h/2) - T(h)) / 3 cancels it and leaves an error of order h\textasciicircum{}4. This combination is exactly Simpson's rule. The same trick on two Simpson values (16 and 15 in place of 4 and 3) cancels the h\textasciicircum{}4 term, and so on. This is \textbf{Richardson extrapolation}; applying it to trapezoid sums is \textbf{Romberg integration}. Column j of the table has error about h\textasciicircum{}(2j+2) and is exact for polynomials up to degree 2j + 1.
+
+The method depends on that series. If the function is not smooth (a square root at the end of the interval) the powers are not even integers and extrapolation gains little. If the function is smooth and periodic over the interval, the trapezoid rule is already extremely accurate, there is nothing left to cancel, and extrapolation only mixes in round-off. Finally, the usual stopping rule (stop when two successive corners agree) can be fooled when the first few values happen to agree by accident. Everything here has an exact answer to compare with; it is a teaching model, not a validated library.
+
+\begin{itemize}[nosep]
+\item h: step size, (b - a) / 2\textasciicircum{}i (same unit as x)
+\item T\_i: trapezoid sum with 2\textasciicircum{}i slices (same unit as the integral)
+\item R(i, j): Romberg table entry in row i and column j (R(i, 0) = T\_i) (same unit as the integral)
+\item c1, c2, ...: error constants that do not depend on h (various)
+\item levels: number of rows of the table (no unit)
+\item values: number of function evaluations, 2\textasciicircum{}(levels-1) + 1 (no unit)
+\end{itemize}
+
+\begin{equation*}
+T(h)=I+c_1h^2+c_2h^4+c_3h^6+\dots
+\end{equation*}
+
+\begin{equation*}
+R(i,j)=\frac{4^{j}\,R(i,j-1)-R(i-1,j-1)}{4^{j}-1},\qquad R(i,0)=T_i
+\end{equation*}
+
+\begin{equation*}
+R(i,1)=\frac{4\,T_i-T_{i-1}}{3}=\text{Simpson's rule with }2^i\text{ slices},\qquad \text{values}=2^{\,\mathrm{levels}-1}+1
+\end{equation*}
+
+\begin{center}\includegraphics[width=0.7\linewidth]{figures/s04_romberg_table.png}\\\small The error of every entry of the Romberg table for e to the x on [0, 1] (darker is smaller).\end{center}
+
+\begin{center}\includegraphics[width=0.95\linewidth]{figures/s04_error_vs_evaluations.png}\\\small Error against the number of function values: trapezoid, Simpson and Romberg, for e to the x and for the bell curve.\end{center}
+
+\begin{center}\includegraphics[width=0.95\linewidth]{figures/s04_failure_cases.png}\\\small Failure cases: the square root gains almost nothing, and for a periodic function Romberg is worse than the trapezoid rule.\end{center}
+
+\subsection*{E. Worked example}
+Build a three-row Romberg table for the area of e\textasciicircum{}x on [0, 1] and compare its corner with Simpson's rule for the same function values.
+\begin{enumerate}[nosep]
+\item Exact: e - 1 = 1.718282. The trapezoid rule with 1, 2 and 4 slices gives T0 = 0.5 (1 + 2.718282) = 1.859141, T1 = 1.753931 and T2 = 1.727222. The three sums use only 5 function values (2, then 1 new, then 2 new).
+\item First column of corrections: R(1,1) = (4 x 1.753931 - 1.859141) / 3 = 1.718861 (error +5.8e-4) and R(2,1) = (4 x 1.727222 - 1.753931) / 3 = 1.718319 (error +3.7e-5).
+\item R(2,1) is Simpson's rule with 4 slices: the same number you found in Session 3.
+\item Second column: R(2,2) = (16 x 1.718319 - 1.718861) / 15 = 1.718283.
+\item The error of R(2,2) is +8.6e-7. With the same 5 values the trapezoid rule has an error of 8.9e-3 (10 000 times larger) and Simpson 3.7e-5 (43 times larger).
+\end{enumerate}
+\textbf{Answer.} R(2,2) = 1.718283 with error 8.6e-7 from 5 function values, against Simpson's 1.718319 (error 3.7e-5) and the trapezoid rule's 1.727222 (error 8.9e-3).
+
+\subsection*{F. Questions}
+\begin{enumerate}[nosep]
+\item \textbf{Conceptual.} Why does (4 T(h/2) - T(h)) / 3 remove the h\textasciicircum{}2 error of the trapezoid rule, and why do we divide by 3?
+\item \textbf{Numerical.} The trapezoid rule for pi = the area of 4 / (1 + x\textasciicircum{}2) on [0, 1] gives T0 = 3.000000, T1 = 3.100000 and T2 = 3.131176. Complete the Romberg table (R(1,1), R(2,1), R(2,2)) and say which entry is closest to pi = 3.141593.
+\item \textbf{Graph and simulation interpretation.} In the error-against-values figure for e\textasciicircum{}x, at 17 values the errors are 5.6e-4 (trapezoid), 1.5e-7 (Simpson) and 3.3e-14 (Romberg). By what factor is Romberg better than each, and what happens to its line beyond 33 values?
+\item \textbf{Design and optimisation challenge.} Your budget is 40 function values (40 minutes) for the area of exp(-x\textasciicircum{}2) on [0, 2]. On the grids of 2\textasciicircum{}k + 1 values, which rule should you use and what error will it reach? What must you budget if you need 1e-12?
+\end{enumerate}
+
 \section{Real-world mini-project}
 \textbf{Reconstruct the distance travelled from a noisy speedometer log.} A car's speedometer was logged 10 times per second for 60 s with \texttt{t, v = speedometer\_log()} from Session 3 (fixed seed 4, the default; the figures below are for that seed and are asserted by the Session 3 checkpoint). The log has random noise of 0.8 m/s and the speedometer reads 2 percent too high. The only outside fact is that a pair of roadside markers shows the car covered 822 m in the 60 s. Use \texttt{integrate\_log} to reconstruct the distance, remove the calibration error with the marker fact, and then estimate the car's acceleration by smoothing the speed before differentiating (a moving average of 21 samples is a good start).
 
+\textbf{How many function values does each rule need?} A heat-flow simulation returns the flux q(x) = exp(-x\textasciicircum{}2) (made-up units) at a point x on a plate 2 units wide, and every call costs one minute. The total heat is the integral of q from 0 to 2, whose exact value sqrt(pi)/2 erf(2) = 0.882081 is known here so that you can check. Use \texttt{evaluations\_needed} and \texttt{romberg\_table} from Session 4 to find, for the targets 1e-6, 1e-8, 1e-10 and 1e-12, how many function values (minutes) the trapezoid rule, Simpson's rule and Romberg integration need on the grids with 2\textasciicircum{}k + 1 values. \textbf{Deliverable:} A script that prints a table of values needed for each rule and target, the number of minutes saved by Romberg against Simpson at 1e-10, and a log-log plot of error against the number of values for the three rules; then two sentences on what happens to Romberg for sqrt(x) on [0, 1] with 129 values (use \texttt{FUNCTIONS[3]}) and why. \textbf{Success looks like:} For 1e-6, 1e-8, 1e-10 and 1e-12 Simpson needs 17, 65, 257 and 513 values and Romberg 17, 33, 33 and 65; the trapezoid rule needs 257, 2049 and 16385 and more than 131 073 for the last. At 1e-10 Romberg saves 224 minutes against Simpson. For sqrt(x) with 129 values the Romberg error is 4.7e-5, only 3 times better than the trapezoid rule's 1.4e-4, because the error series has no even powers of h to cancel.
+
 \section{The path ahead}
 \begin{enumerate}[nosep]
-\item \textbf{Session 4: Romberg integration.} A Romberg table that builds higher-order rules from the trapezoid rule.
 \item \textbf{Session 5: Gaussian quadrature.} A Gauss-Legendre integrator with a handful of nodes.
 \item \textbf{Session 6: Derivatives without subtraction.} A derivative routine that avoids the round-off limit of Session 3.
 \item \textbf{Session 7: Derivatives of noisy data.} A smoothing differentiator for the speedometer log of the mini-project.
@@ -222,6 +282,14 @@ Find the forward and central difference of sin x at x = 1 with h = 0.1 and compa
 \item \textbf{Numerical.} Hint: Doubling n halves h; error scales as h\textasciicircum{}p, so it is divided by 2\textasciicircum{}p. Solution: Trapezoid is order 2, so the error falls by a factor 2\textasciicircum{}2 = 4: about 1.4e-4. Simpson is order 4, so the error falls by 2\textasciicircum{}4 = 16: about 9e-9. Sanity check: Simpson at n = 16 is already about 4000 times more accurate than the trapezoid at the same n (5.6e-4 against 1.5e-7).
 \item \textbf{Graph and simulation interpretation.} Hint: Slope = change in log error / change in log h. Solution: The slope is 4 (error falls by a factor 10\textasciicircum{}4 when h falls by 10), so the order is 4: Simpson's rule. Forward difference has slope 1, central difference and the trapezoid rule have slope 2.
 \item \textbf{Design and optimisation challenge.} Hint: The adaptive rule splits slices only where its two estimates disagree. What if the first few samples all miss the spike? Solution: For the peak at 0.35 with width 0.005 the exact area is 0.0088623. Uniform Simpson reaches 1e-8 only with n = 512 slices (513 evaluations). Adaptive Simpson starting from 16 panels reaches the same accuracy with 424 evaluations, putting small slices at the spike. The risk: if the starting samples all miss the spike, the two estimates agree (both near 0) and the rule stops early with the wrong answer; that is why we start from 16 panels. The saving is moderate here and larger for narrower features. A 10-slice trapezoid reports 0.000000, wrong by 100 percent.
+\end{enumerate}
+
+\subsection*{Session 4}
+\begin{enumerate}[nosep]
+\item \textbf{Conceptual.} Hint: Write T(h) = I + c1 h\textasciicircum{}2 + ... and T(h/2) = I + c1 h\textasciicircum{}2 / 4 + ... and look at the c1 terms. Solution: T(h) = I + c1 h\textasciicircum{}2 + c2 h\textasciicircum{}4 + ... and, with half the step, T(h/2) = I + c1 h\textasciicircum{}2 / 4 + c2 h\textasciicircum{}4 / 16 + .... The h\textasciicircum{}2 term of 4 T(h/2) is c1 h\textasciicircum{}2, the same as in T(h), so it cancels in 4 T(h/2) - T(h). What remains is 3 I plus terms in h\textasciicircum{}4, so we divide by 3 to get I back. The leftover error is order h\textasciicircum{}4: this is Simpson's rule. For the next column the h\textasciicircum{}4 terms are c2 h\textasciicircum{}4 and c2 h\textasciicircum{}4 / 16, so the factor is 16 and the divisor 15.
+\item \textbf{Numerical.} Hint: R(i,1) = (4 T\_i - T\_(i-1)) / 3 and R(2,2) = (16 R(2,1) - R(1,1)) / 15. Solution: R(1,1) = (4 x 3.1 - 3.0) / 3 = 3.133333. R(2,1) = (4 x 3.131176 - 3.1) / 3 = 3.141569. R(2,2) = (16 x 3.141569 - 3.133333) / 15 = 3.142118. The errors are -8.3e-3, -2.4e-5 and +5.3e-4: the closest entry is R(2,1), not the corner. With only 5 values the h\textasciicircum{}6 term is not yet small compared with the h\textasciicircum{}4 term, so the last extrapolation overshoots. With 6 rows (33 values) the corner has caught up and is at 4.8e-11, but it is no better than the best entry of its row (3.7e-11).
+\item \textbf{Graph and simulation interpretation.} Hint: Divide the errors. Look for the floor in the figure near 1e-16. Solution: Romberg is 5.6e-4 / 3.3e-14 = 1.7e10 times better than the trapezoid rule and 1.5e-7 / 3.3e-14 = 4.4e6 times better than Simpson. Beyond 33 values (error about 2e-16 in the lesson) the line stops falling and wobbles around 1e-16: the answer is at the round-off limit of double precision, so more values cannot help and cost more.
+\item \textbf{Design and optimisation challenge.} Hint: The grids have 3, 5, 9, 17, 33, 65 values. Use the largest that fits, and the table in section C. Solution: The largest grid within 40 values has 33 values. There the errors are 2.4e-5 for the trapezoid rule, 6.2e-8 for Simpson and 5.3e-11 for Romberg (corner), so Romberg is the best choice, over 1000 times better than Simpson. For 1e-12 Romberg needs 65 values (error 1.2e-13) against 513 for Simpson, so budget 65 minutes. Note that for this function the corner is not always the best entry of its row: at 33 values the entry in column 2 has error 2.2e-11, slightly better than the corner, but you cannot know which entry is best without the exact answer, so the corner is the usual choice.
 \end{enumerate}
 
 \section{How to join}

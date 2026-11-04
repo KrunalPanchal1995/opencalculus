@@ -2,16 +2,6 @@
 
 This is the path, not the code. Each milestone says what you learn, what you build, and how you know it works. Pick one and open a pull request. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Session 4: Romberg integration
-
-**You will learn:** How combining trapezoid sums at several step sizes cancels error terms.
-
-**You will build:** A Romberg table that builds higher-order rules from the trapezoid rule.
-
-**Checkpoint (not met by the shipped code):** The area of e^x on [0, 1] to an error below 1e-12 using at most 17 function evaluations (the shipped Simpson rule with 17 evaluations gives 1.5e-7).
-
-**Difficulty:** intermediate
-
 ## Session 5: Gaussian quadrature
 
 **You will learn:** Why well-chosen sample points beat equally spaced ones.
